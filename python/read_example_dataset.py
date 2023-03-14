@@ -1,17 +1,23 @@
 import pandas as pd
+import json
 
 df = pd.read_csv('../data/export.csv')
 
-print(df)
+df = df.values.tolist()
 
-print(df.columns)
+f = open("../data/clean.csv", "w")
 
-series = df['Response']
+for line in df:
+    #print(line)
+    f.write(line[0]) # time
+    f.write(";")
+    f.write(str(line[1])) # nr
 
-column_list = series.tolist()
-
-with open('../data/logs.json', 'w') as file:
-    for line in column_list:
-        file.write(f'{line}\n')
-
-
+    js = json.loads(line[2])
+    characteristics = js["PartState"]["Characteristics"]
+    for i in range(1, 8):
+        f.write(";")
+        c = characteristics[i];
+        f.write(str(c["Actual"]))
+    
+    f.write("\n")
