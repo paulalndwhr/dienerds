@@ -21,10 +21,11 @@ print(columns)
 #             plt.plot()
 #             pdf.savefig()
 #             plt.close
-
-fig = px.scatter(df, x='time', y='/Section E-E/Circle 10/D', color='comment')
-fig.show()
-fig.write_html("../data/example_team.html")
+for section in df.columns:
+    if 'Section' in section:
+        fig = px.scatter(df, x='comment', y=section, color='comment')
+        fig.show()
+        fig.write_html("../data/" + section.replace("/", "_") + "example_team.html")
 # import datetime
 # import numpy as np
 # from matplotlib.backends.backend_pdf import PdfPages
