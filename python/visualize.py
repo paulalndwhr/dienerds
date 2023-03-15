@@ -254,7 +254,7 @@ if __name__ == '__main__':
     df = pd.read_csv('../data/clean.csv', sep=';')
     columns = df.columns
     print(columns)
-
+    # fine now?
     fig = px.scatter(df, x='/Section D-D/Circle 1/D', y='/Section E-E/Circle 10/D', color='nr')
     fig.show()
     fig.write_html("../data/example.html")
