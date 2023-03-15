@@ -8,6 +8,8 @@ import numpy as np
 from typing import List
 from math import exp
 
+df = pd.read_csv('../data/clean1-12_rel_filtered.csv', sep=';')
+
 
 # with PdfPages('dienerds.pdf') as pdf:
 #     for i in columns:
@@ -33,6 +35,7 @@ from math import exp
 #             plt.plot()
 #             pdf.savefig()
 #             plt.close
+
 #
 # fig = px.scatter(df, x='/Section D-D/Circle 1/D', y='/Section E-E/Circle 10/D', color='nr')
 # fig.show()
