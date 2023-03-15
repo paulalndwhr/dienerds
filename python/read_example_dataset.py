@@ -7,6 +7,8 @@ df = df.values.tolist()
 
 f = open("../data/clean.csv", "w")
 
+comments = set()
+
 for line in df:
     #print(line)
     f.write(line[0]) # time
@@ -25,5 +27,9 @@ for line in df:
     f.write(str(line[2])) # Team
     f.write(";")
     f.write(str(line[3])) # Comment
-    
+
+    comments.add(str(line[3]))
+
     f.write("\n")
+
+print(comments)
