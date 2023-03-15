@@ -7,6 +7,8 @@ df = df.values.tolist()
 
 f = open("../data/clean.csv", "w")
 
+f.write("time;nr;/Section D-D/Circle 1/D;/Section D-D/Circle 9/D;/Section D-D/Circle 10/D;/Section E-E/Circle 1/D;/Section E-E/Circle 9/D;/Section E-E/Circle 10/D;/Cylinder (5)/D;team;comment\n") # alle header
+
 comments = set()
 
 for line in df:
@@ -14,7 +16,6 @@ for line in df:
     f.write(line[0]) # time
     f.write(";")
     f.write(str(line[1])) # nr
-
 
     js = json.loads(line[4]) # column Request
     characteristics = js["PartState"]["Characteristics"]
