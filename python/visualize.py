@@ -47,8 +47,8 @@ print(columns)
 with PdfPages('dienerds.pdf') as pdf:
     for i in columns:
         print(f'i = {i}')
-        # for j in columns:
-        for j in ['/Section D-D/Circle 1/D']:
+        for j in columns:
+        # for j in ['/Section D-D/Circle 1/D']:
             print(f'j = {j}')
             try:
                 x_mean = df[i].mean()
