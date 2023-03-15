@@ -127,7 +127,7 @@ def pdf_potentially_relevant_diagr(df: pd.DataFrame, savename: str = 'dienerds-w
 
                     best_curves = find_best_curve(df=df, col_x=i, col_y=j)
 
-                    #plot2 = sns.lineplot(data=df, x=df[i], y=exponential(x, *best_curves['exp']), color='g', ax=ax)
+                    plot2 = sns.lineplot(data=df, x=df[i], y=exponential(x, *best_curves['exp']), color='g', ax=ax)
                     r, p = sp.stats.pearsonr(df[i], df[j])
                     plt.xlabel(f'{i}, mean={x_mean}, var={x_var}\n r^2={r ** 2}')
                     plt.ylabel(f'{j}, mean={y_mean}, var={y_var}')
@@ -206,9 +206,9 @@ def find_best_curve(df: pd.DataFrame, col_x: str, col_y: str):
 
 def pdf_potentially_relevant_with_fitted_curves(df: pd.DataFrame, savename='dienerds-lines-without-garbage.pdf'):
     with PdfPages(savename) as pdf:
-        for i in columns[:-1]:
+        for i in columns:
             print(f'i = {i}')
-            for j in columns[:-1]:
+            for j in columns:
                 # for j in ['/Section D-D/Circle 1/D']:
                 print(f'j = {j}')
                 # this section skips unnecessary diagrams which just increase the .pdf file size
@@ -233,37 +233,19 @@ def pdf_potentially_relevant_with_fitted_curves(df: pd.DataFrame, savename='dien
                     ax.legend(loc="upper left")
 
                     best_curves = find_best_curve(df=df, col_x=i, col_y=j)
-                    # x_values = np.linspace(df[i].min(), df[i].max(), 500)  # somehow, this does not work. What am I thinking wrong?
 
-                    x_values = df[i]
-                    # print(df[i])
-                    # print(x_values)
-                    plot2 = sns.lineplot(data=df, x=x_values, y=exponential(x_values, *best_curves['exp']), color='g', ax=ax)
-                    plot3 = sns.lineplot(data=df, x=x_values, y=quartic(x_values, *best_curves['quart']), color='r', ax=ax)
-                    plot4 = sns.lineplot(data=df, x=x_values, y=cubic(x_values, *best_curves['cube']), color='m', ax=ax)
-                    plot5 = sns.lineplot(data=df, x=x_values, y=quadratic(x_values, *best_curves['quad']), color='y', ax=ax)
-
+                    plot2 = sns.lineplot(data=df, x=df[i], y=exponential(x, *best_curves['exp']), color='g', ax=ax)
                     r, p = sp.stats.pearsonr(df[i], df[j])
                     plt.xlabel(f'{i}, mean={x_mean}, var={x_var}\n r^2={r ** 2}')
                     plt.ylabel(f'{j}, mean={y_mean}, var={y_var}')
-
                 except TypeError:
                     x_mean = 'N/A'
                     y_mean = 'N/A'
                     x_var = 'N/A'
                     y_var = 'N/A'
                     plt.scatter(df[i], df[j], color='b', alpha=0.05)
+
                     plt.xlabel(f'{i}, mean={x_mean}, var={x_var}')
-                    plt.ylabel(f'{j}, mean={y_mean}, var={y_var}')
-
-                except ValueError:
-                    x_mean = 'N/A'
-                    y_mean = 'N/A'
-                    x_var = 'N/A'
-                    y_var = 'N/A'
-                    plt.scatter(df[i], df[j], color='b', alpha=0.05)
-
-                    plt.xlabel(f'{i}, mean={x_mean}, var={x_var}, VALUE ERROR GECATCHED')
                     plt.ylabel(f'{j}, mean={y_mean}, var={y_var}')
                 plt.title(f'{i} gegen {j}')
                 plt.plot()
@@ -276,9 +258,9 @@ if __name__ == '__main__':
     columns = df.columns
     print(columns)
     # fine now?
-    # fig = px.scatter(df, x='/Section D-D/Circle 1/D', y='/Section E-E/Circle 10/D', color='nr')
-    # fig.show()
-    # fig.write_html("../data/example.html")
+    fig = px.scatter(df, x='/Section D-D/Circle 1/D', y='/Section E-E/Circle 10/D', color='nr')
+    fig.show()
+    fig.write_html("../data/example.html")
 
     #find_best_curve(df=df, col_x='/Section E-E/Circle 10/D', col_y='/Section D-D/Circle 10/D')
     #pdf_potentially_relevant_diagr(df=df)
