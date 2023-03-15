@@ -3,7 +3,7 @@ import pandas as pd
 from matplotlib.backends.backend_pdf import PdfPages
 import plotly.express as px
 
-df = pd.read_csv('../data/clean.csv', sep=';')
+df = pd.read_csv('../data/clean1-12_rel_filtered.csv', sep=';')
 
 columns = df.columns
 print(columns)
