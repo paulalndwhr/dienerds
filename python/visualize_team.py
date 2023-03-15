@@ -3,7 +3,7 @@ import pandas as pd
 from matplotlib.backends.backend_pdf import PdfPages
 import plotly.express as px
 
-df = pd.read_csv('../data/clean1-12_rel_filtered.csv', sep=';')
+df = pd.read_csv('../data/teammessung.csv', sep=';')
 
 columns = df.columns
 print(columns)
@@ -22,9 +22,9 @@ print(columns)
 #             pdf.savefig()
 #             plt.close
 
-fig = px.line(df, x='/Section D-D/Circle 1/D', y='/Section E-E/Circle 10/D', color='nr')
+fig = px.scatter(df, x='/Section D-D/Circle 1/D', y='/Section E-E/Circle 10/D', color='comment')
 fig.show()
-fig.write_html("../data/example.html")
+fig.write_html("../data/example_team.html")
 # import datetime
 # import numpy as np
 # from matplotlib.backends.backend_pdf import PdfPages
