@@ -201,7 +201,7 @@ def find_best_curve(df: pd.DataFrame, col_x: str, col_y: str):
     return {'exp': popt_exp, 'quad': popt_quad, 'cube': popt_cube, 'quart': popt_quart}
 
 
-def pdf_potentially_relevant_with_fitted_curves(df: pd.DateFrame, savename='dienerds-lines-without-garbage.pdf'):
+def pdf_potentially_relevant_with_fitted_curves(df: pd.DataFrame, savename='dienerds-lines-without-garbage.pdf'):
     with PdfPages(savename) as pdf:
         for i in columns:
             print(f'i = {i}')
