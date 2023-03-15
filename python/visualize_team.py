@@ -22,7 +22,7 @@ print(columns)
 #             pdf.savefig()
 #             plt.close
 
-fig = px.scatter(df, x='/Section D-D/Circle 1/D', y='/Section E-E/Circle 10/D', color='comment')
+fig = px.scatter(df, x='time', y='/Section E-E/Circle 10/D', color='comment')
 fig.show()
 fig.write_html("../data/example_team.html")
 # import datetime
