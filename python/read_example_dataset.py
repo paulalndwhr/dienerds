@@ -13,11 +13,17 @@ for line in df:
     f.write(";")
     f.write(str(line[1])) # nr
 
-    js = json.loads(line[2])
+
+    js = json.loads(line[4]) # column Request
     characteristics = js["PartState"]["Characteristics"]
     for i in range(1, 8):
         f.write(";")
         c = characteristics[i];
         f.write(str(c["Actual"]))
+        
+    f.write(";")
+    f.write(str(line[2])) # Team
+    f.write(";")
+    f.write(str(line[3])) # Comment
     
     f.write("\n")
