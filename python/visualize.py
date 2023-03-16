@@ -313,17 +313,17 @@ def animation_drift(raw_df: pd.DataFrame, x: str = '/Section D-D/Circle 1/D',
 if __name__ == '__main__':
     # df = pd.read_csv('../data/clean1-12_rel_filtered.csv', sep=';')
     df = pd.read_csv('../data/clean13+.csv', sep=';')
-    # columns = df.columns
-    # print(columns)
-    # # fine now?
-    # fig = px.scatter(df, x='/Section D-D/Circle 1/D', y='/Section E-E/Circle 10/D', color='nr')
-    # fig.show()
-    # fig.write_html("../data/example.html")
-    #
-    # #find_best_curve(df=df, col_x='/Section E-E/Circle 10/D', col_y='/Section D-D/Circle 10/D')
-    # #pdf_potentially_relevant_diagr(df=df)
-    #
-    # pdf_potentially_relevant_with_fitted_curves(df=df)
+    columns = df.columns
+    print(columns)
+    # fine now?
+    fig = px.scatter(df, x='/Section D-D/Circle 1/D', y='/Section E-E/Circle 10/D', color='nr')
+    fig.show()
+    fig.write_html("../data/example.html")
+
+    # find_best_curve(df=df, col_x='/Section E-E/Circle 10/D', col_y='/Section D-D/Circle 10/D')
+    # pdf_potentially_relevant_diagr(df=df)
+
+    pdf_potentially_relevant_with_fitted_curves(df=df)
     animation_drift(raw_df=df)
 
 
