@@ -303,9 +303,9 @@ def animation_drift(raw_df: pd.DataFrame, x: str = '/Section D-D/Circle 1/D',
     # df = pd.DataFrame(storage_list)
     print(df)
     fig = px.scatter(df, x=x, y=y, animation_frame="timestamp", animation_group="nr", color="nr",
-                     title='Drift Anaimation', color_continuous_scale='Reds',
+                     title='Drift Animation', color_continuous_scale='Reds',
                      labels={'x': x, 'y': y,
-                             'timestamp': 'Anzahl vermessene Teile'}
+                             'timestamp': 'ID zuletzt vermessenes Teil'}
                      )
     fig.show()
 
