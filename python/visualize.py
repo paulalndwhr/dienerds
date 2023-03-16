@@ -170,8 +170,20 @@ def linear(x, m, b):
     return m * x + b
 
 
-def logarithm(x, x_shift):  #, a):  # ,y_shift):
-    return np.log(x - x_shift)  # - y_shift
+def logarithm(x, x_shift, a):  # ,y_shift):
+    try:
+        return a * np.log(x - x_shift)  # - y_shift
+    except ValueError:
+        return - np.Inf
+
+
+def fract(x, x_shift, y_shift, a):
+    nenner = (x-x_shift)
+    # if nenner == 0:
+    #     return 0
+    # else:
+    #     return a/nenner + y_shift
+    return a / nenner + y_shift
 
 
 def mean_square_error(function, arg_opt: List[float], xdata: List[float], ydata: List[float]) -> float:
@@ -195,7 +207,8 @@ def find_best_curve(df: pd.DataFrame, col_x: str, col_y: str):
     popt_cube, pcov_cube = sp.optimize.curve_fit(cubic, df[col_x].values, df[col_y].values, p0=[1, 1, 1, 1])
     popt_quart, pcov_quart = sp.optimize.curve_fit(quartic, df[col_x].values, df[col_y].values, p0=[1, 1, 1, 1, 1])
     popt_lin, pcov_lin = sp.optimize.curve_fit(linear, df[col_x].values, df[col_y].values, p0=[1, 1])
-    popt_log, pcov_log = sp.optimize.curve_fit(logarithm, df[col_x].values, df[col_y].values, p0=[1])
+    # popt_log, pcov_log = sp.optimize.curve_fit(logarithm, df[col_x].values, df[col_y].values, p0=[1, 1])
+    popt_frac, pcov_frac = sp.optimize.curve_fit(fract, df[col_x].values, df[col_y].values, p0=[0, -0.08, -0.01])
 
     print(f'exp {popt_exp}, '
           f'r^2={mean_square_error(exponential, arg_opt=popt_exp, xdata=df[col_x].values, ydata=df[col_y].values)}')
@@ -216,11 +229,16 @@ def find_best_curve(df: pd.DataFrame, col_x: str, col_y: str):
         f'linear {popt_lin}, '
         f'r^2={mean_square_error(linear, arg_opt=popt_lin, xdata=df[col_x].values, ydata=df[col_y].values)}')
 
+    # print(
+    #     f'log {popt_log}, '
+    #     f'r^2={mean_square_error(logarithm, arg_opt=popt_log, xdata=df[col_x].values, ydata=df[col_y].values)}')
+
     print(
-        f'log {popt_log}, '
-        f'r^2={mean_square_error(logarithm, arg_opt=popt_log, xdata=df[col_x].values, ydata=df[col_y].values)}')
+        f'fract {popt_frac}, '
+        f'r^2={mean_square_error(fract, arg_opt=popt_frac, xdata=df[col_x].values, ydata=df[col_y].values)}')
+
     return {'exp': popt_exp, 'quad': popt_quad, 'cube': popt_cube, 'quart': popt_quart,
-            'lin': popt_lin, 'log': popt_log}
+            'lin': popt_lin,  'frac': popt_frac}
 
 
 def pdf_potentially_relevant_with_fitted_curves(df: pd.DataFrame, savename='dienerds-lines-without-garbage.pdf'):
@@ -338,15 +356,19 @@ def onedim_regression_prediction(df: pd.DataFrame, savename='dienerds-prediction
     :param y:
     :return:
     """
+    df.drop(df[df['nr'] == 0].index, inplace=True)
 
     df.sort_values('time')
     df['zeit'] = np.arange(len(df))
+    sample_df = df.drop(df[df['nr'] > 6].index)
 
-    best_curves = find_best_curve(df=df, col_x=x, col_y=y)
+    best_curves = find_best_curve(df=sample_df, col_x=x, col_y=y)
+
+    sample_df.drop(sample_df[sample_df['nr'] == 1].index, inplace=True)
+    df.drop(df[df['nr'] == 1].index, inplace=True)
     x_values = df[x]
 
     with PdfPages(savename) as pdf:
-
         x_mean = df[x].mean()
         y_mean = df[y].mean()
         x_var = df[x].var()
@@ -354,24 +376,22 @@ def onedim_regression_prediction(df: pd.DataFrame, savename='dienerds-prediction
 
         # must still filter the df
 
-        sample_df = df.drop(df[df['nr'] > 6].index)
-
         fig, ax = plt.subplots(figsize=(10, 6))
         sns.scatterplot(x=sample_df[x], y=sample_df[y])
-        plot2 = sns.lineplot(data=df, x=x_values, y=linear(x_values, *best_curves['lin']),
+        plot2 = sns.lineplot(data=df, x=x_values, y=fract(x_values, *best_curves['frac']),
                              color='g', ax=ax)
-
+        plot2.ylim = (-0.08, -0.02)
         plt.title(f'Regressionsanalyse {x}')
         plt.plot()
         pdf.savefig()
         plt.close
 
-        print(best_curves['log'])
+        # print(best_curves['log'])
 
         #final shit
         fig, ax = plt.subplots(figsize=(10, 6))
         sns.scatterplot(x=df[x], y=df[y])
-        plot2 = sns.lineplot(data=df, x=x_values, y=logarithm(x_values, *best_curves['log']),
+        plot2 = sns.lineplot(data=df, x=x_values, y=fract(x_values, *best_curves['frac']),
                              color='g', ax=ax)
 
         plt.title(f'Regressionsanalyse {x}')
