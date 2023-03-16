@@ -277,19 +277,54 @@ def pdf_potentially_relevant_with_fitted_curves(df: pd.DataFrame, savename='dien
                 plt.close
 
 
-if __name__ == '__main__':
-    df = pd.read_csv('../data/clean1-12_rel_filtered.csv', sep=';')
-    columns = df.columns
-    print(columns)
-    # fine now?
-    fig = px.scatter(df, x='/Section D-D/Circle 1/D', y='/Section E-E/Circle 10/D', color='nr')
+def animation_drift(raw_df: pd.DataFrame, x: str = '/Section D-D/Circle 1/D',
+                    y: str = '/Section E-E/Circle 10/D') -> None:
+    numbers = raw_df['nr'].drop_duplicates().sort_values().tolist()
+    print(numbers)
+    storage_list = []
+    df = pd.DataFrame(columns=raw_df.columns)
+    for idx, n in enumerate(numbers):
+        temp_df = raw_df.copy()
+        t2_df = raw_df.copy()
+        # die letzten bleiben übrig und sind auf -1 zu setzen
+        temp_df.drop(temp_df[temp_df['nr'].isin(numbers[:idx])].index, inplace=True)
+        temp_df[x] = -1
+        temp_df[y] = -1
+        # hier wird genau das Ggenstück dazu genommen und vWerte werde behalten
+        t2_df.drop(temp_df[~temp_df['nr'].isin(numbers[:idx])].index, inplace=True)
+        # temp_df[x].loc[temp_df['nr'].isin(numbers[-idx:])] = -1
+        # temp_df[y].loc[temp_df['nr'].isin(numbers[-idx:])] = -1
+        # temp_df = raw_df.loc[raw_df['nr'].isin(numbers[:idx])]
+        temp_df['timestamp'] = n
+        t2_df['timestamp'] = n
+        df = pd.concat([df, temp_df, t2_df], axis=0)
+        # storage_list.append(temp_df.to_dict)
+    # print(storage_list)
+    # df = pd.DataFrame(storage_list)
+    print(df)
+    fig = px.scatter(df, x=x, y=y, animation_frame="timestamp", animation_group="nr", color="nr",
+                     title='Drift Anaimation', color_continuous_scale='Reds',
+                     labels={'x': x, 'y': y,
+                             'timestamp': 'Anzahl vermessene Teile'}
+                     )
     fig.show()
-    fig.write_html("../data/example.html")
 
-    #find_best_curve(df=df, col_x='/Section E-E/Circle 10/D', col_y='/Section D-D/Circle 10/D')
-    #pdf_potentially_relevant_diagr(df=df)
 
-    pdf_potentially_relevant_with_fitted_curves(df=df)
+if __name__ == '__main__':
+    # df = pd.read_csv('../data/clean1-12_rel_filtered.csv', sep=';')
+    df = pd.read_csv('../data/clean13+.csv', sep=';')
+    # columns = df.columns
+    # print(columns)
+    # # fine now?
+    # fig = px.scatter(df, x='/Section D-D/Circle 1/D', y='/Section E-E/Circle 10/D', color='nr')
+    # fig.show()
+    # fig.write_html("../data/example.html")
+    #
+    # #find_best_curve(df=df, col_x='/Section E-E/Circle 10/D', col_y='/Section D-D/Circle 10/D')
+    # #pdf_potentially_relevant_diagr(df=df)
+    #
+    # pdf_potentially_relevant_with_fitted_curves(df=df)
+    animation_drift(raw_df=df)
 
 
 
