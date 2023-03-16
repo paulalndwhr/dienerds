@@ -6,7 +6,7 @@ import scipy as sp
 import seaborn as sns
 import numpy as np
 from typing import List
-from math import exp
+from math import exp, log
 
 df = pd.read_csv('../data/clean1-12_rel_filtered.csv', sep=';')
 
@@ -166,6 +166,14 @@ def quartic(x, a, b, c, d, e):
     return a * x ** 4 + b * x ** 3 + c * x ** 2 + d * x + e
 
 
+def linear(x, m, b):
+    return m * x + b
+
+
+def logarithm(x, x_shift):  #, a):  # ,y_shift):
+    return np.log(x - x_shift)  # - y_shift
+
+
 def mean_square_error(function, arg_opt: List[float], xdata: List[float], ydata: List[float]) -> float:
     residuals = ydata - function(xdata, *arg_opt)
     ss_res = np.sum(residuals ** 2)
@@ -186,6 +194,8 @@ def find_best_curve(df: pd.DataFrame, col_x: str, col_y: str):
     popt_quad, pcov_quad = sp.optimize.curve_fit(quadratic, df[col_x].values, df[col_y].values, p0=[1, 1, 1])
     popt_cube, pcov_cube = sp.optimize.curve_fit(cubic, df[col_x].values, df[col_y].values, p0=[1, 1, 1, 1])
     popt_quart, pcov_quart = sp.optimize.curve_fit(quartic, df[col_x].values, df[col_y].values, p0=[1, 1, 1, 1, 1])
+    popt_lin, pcov_lin = sp.optimize.curve_fit(linear, df[col_x].values, df[col_y].values, p0=[1, 1])
+    popt_log, pcov_log = sp.optimize.curve_fit(logarithm, df[col_x].values, df[col_y].values, p0=[1])
 
     print(f'exp {popt_exp}, '
           f'r^2={mean_square_error(exponential, arg_opt=popt_exp, xdata=df[col_x].values, ydata=df[col_y].values)}')
@@ -201,12 +211,20 @@ def find_best_curve(df: pd.DataFrame, col_x: str, col_y: str):
     print(
         f'quartic {popt_quart}, '
         f'r^2={mean_square_error(quartic, arg_opt=popt_quart, xdata=df[col_x].values, ydata=df[col_y].values)}')
-    return {'exp': popt_exp, 'quad': popt_quad, 'cube': popt_cube, 'quart': popt_quart}
+
+    print(
+        f'linear {popt_lin}, '
+        f'r^2={mean_square_error(linear, arg_opt=popt_lin, xdata=df[col_x].values, ydata=df[col_y].values)}')
+
+    print(
+        f'log {popt_log}, '
+        f'r^2={mean_square_error(logarithm, arg_opt=popt_log, xdata=df[col_x].values, ydata=df[col_y].values)}')
+    return {'exp': popt_exp, 'quad': popt_quad, 'cube': popt_cube, 'quart': popt_quart,
+            'lin': popt_lin, 'log': popt_log}
 
 
 def pdf_potentially_relevant_with_fitted_curves(df: pd.DataFrame, savename='dienerds-lines-without-garbage.pdf'):
     with PdfPages(savename) as pdf:
-
         for i in columns[:-1]:
             print(f'i = {i}')
             for j in columns[:-1]:
@@ -310,21 +328,75 @@ def animation_drift(raw_df: pd.DataFrame, x: str = '/Section D-D/Circle 1/D',
     fig.show()
 
 
+def onedim_regression_prediction(df: pd.DataFrame, savename='dienerds-prediction.pdf',
+                                  x='nr', y='/Section D-D/Circle 1/D'):
+    """
+
+    :param df:
+    :param savename:
+    :param x:
+    :param y:
+    :return:
+    """
+
+    df.sort_values('time')
+    df['zeit'] = np.arange(len(df))
+
+    best_curves = find_best_curve(df=df, col_x=x, col_y=y)
+    x_values = df[x]
+
+    with PdfPages(savename) as pdf:
+
+        x_mean = df[x].mean()
+        y_mean = df[y].mean()
+        x_var = df[x].var()
+        y_var = df[y].var()
+
+        # must still filter the df
+
+        sample_df = df.drop(df[df['nr'] > 6].index)
+
+        fig, ax = plt.subplots(figsize=(10, 6))
+        sns.scatterplot(x=sample_df[x], y=sample_df[y])
+        plot2 = sns.lineplot(data=df, x=x_values, y=linear(x_values, *best_curves['lin']),
+                             color='g', ax=ax)
+
+        plt.title(f'Regressionsanalyse {x}')
+        plt.plot()
+        pdf.savefig()
+        plt.close
+
+        print(best_curves['log'])
+
+        #final shit
+        fig, ax = plt.subplots(figsize=(10, 6))
+        sns.scatterplot(x=df[x], y=df[y])
+        plot2 = sns.lineplot(data=df, x=x_values, y=logarithm(x_values, *best_curves['log']),
+                             color='g', ax=ax)
+
+        plt.title(f'Regressionsanalyse {x}')
+        plt.plot()
+        pdf.savefig()
+        plt.close
+
+
 if __name__ == '__main__':
-    # df = pd.read_csv('../data/clean1-12_rel_filtered.csv', sep=';')
-    df = pd.read_csv('../data/clean13+.csv', sep=';')
+    df = pd.read_csv('../data/clean1-12_rel_filtered.csv', sep=';')
+    # df = pd.read_csv('../data/clean13+.csv', sep=';')
     columns = df.columns
     print(columns)
+
+    onedim_regression_prediction(df=df)
     # fine now?
-    fig = px.scatter(df, x='/Section D-D/Circle 1/D', y='/Section E-E/Circle 10/D', color='nr')
-    fig.show()
-    fig.write_html("../data/example.html")
-
-    # find_best_curve(df=df, col_x='/Section E-E/Circle 10/D', col_y='/Section D-D/Circle 10/D')
-    # pdf_potentially_relevant_diagr(df=df)
-
-    pdf_potentially_relevant_with_fitted_curves(df=df)
-    animation_drift(raw_df=df)
+    # fig = px.scatter(df, x='/Section D-D/Circle 1/D', y='/Section E-E/Circle 10/D', color='nr')
+    # fig.show()
+    # fig.write_html("../data/example.html")
+    #
+    # # find_best_curve(df=df, col_x='/Section E-E/Circle 10/D', col_y='/Section D-D/Circle 10/D')
+    # # pdf_potentially_relevant_diagr(df=df)
+    #
+    # pdf_potentially_relevant_with_fitted_curves(df=df)
+    # animation_drift(raw_df=df)
 
 
 
